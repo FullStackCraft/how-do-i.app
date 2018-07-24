@@ -12,6 +12,8 @@ var ansi_up = new AU.default;
 
 const options = [
   { key: 'javascript', text: 'javascript', value: 'javascript' },
+  { key: 'css', text: 'css', value: 'css' },
+  { key: 'html', text: 'html', value: 'html' },
   { key: 'react', text: 'react', value: 'react' },
   { key: 'vue', text: 'vue', value: 'vue' },
   { key: 'typescript', text: 'typescript', value: 'typescript' },
@@ -208,7 +210,7 @@ class Landing extends React.Component {
               <h2 className="text-center">How Do I...</h2>
               <p className="text-center">Type any coding question into the form and press enter or submit!</p>
               <Input
-                className="text-center ui-input-overrides"
+                className="text-center ui-input-overrides input-width"
                 style={{display: "block", margin:"0 auto"}}
                 type="text"
                 name="sInput"

@@ -152,6 +152,14 @@ select.form-control:focus {
   color: white;
   text-align: center; }
 
+@media only screen and (max-width: 500px) {
+  .footer {
+    font-size: 10px; } }
+
+@media only screen and (max-width: 500px) {
+  .input-width {
+    width: 100px !important; } }
+
 a {
   color: white !important;
   text-decoration: underline !important; }

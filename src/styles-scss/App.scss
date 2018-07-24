@@ -190,6 +190,18 @@ select.form-control:focus {
     color: white;
     text-align: center;
 }
+@media only screen and (max-width: 500px) { // all phones
+  .footer {
+      font-size: 10px;
+  }
+}
+
+@media only screen and (max-width: 500px) { // all phones
+  .input-width {
+      width: 100px !important;
+  }
+}
+
 
 a {
   color: white !important;
