@@ -1,10 +1,221 @@
-@import "Animate";
-@import "Bootsnav";
-@import "Bootstrap";
-@import "FontAwesome";
-@import "Hover";
-@import "Magnific";
-@import "Responsive";
-@import "Style";
-@import "Transitions";
-@import "Loader";
+@font-face {
+  font-family: 'ArialRoundedMTBold';
+  src:url(../fonts/ArialRoundedMTBold.ttf); 
+}
+
+body {
+  font-family: 'ArialRoundedMTBold', serif !important;
+}
+
+.text-center {
+  text-align: center;
+}
+
+pre {
+	padding: 0.5em;
+	margin: 5px;
+	overflow: auto;
+	overflow-y: hidden;
+	font-size: 12px;
+	line-height: 20px;
+  border-radius: 5px;
+	background: #E8E8E8;
+}
+pre code {
+	padding: 10px;
+	color: #333;
+}
+
+@media only screen and (max-width: 500px) {
+  .form-control {
+    color: black !important;
+    font-size: 30px;
+    font-family: 'ArialRoundedMTBold', serif;
+    width: 260px !important;
+    // margin: 0 auto;
+  }
+}
+
+@media only screen and (min-width: 690px) {
+  .form-control {
+    color: black !important;
+    font-size: 30px;
+    font-family: 'ArialRoundedMTBold', serif;
+    width: 660px !important;
+    // margin: 0 auto;
+  }
+}
+
+
+input[type="text"],
+select.form-control {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid black;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  border-radius: 0;
+  width: 20em;
+}
+
+input[type="text"]:focus,
+select.form-control:focus {
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+
+@media only screen and (max-width: 500px) {
+  .response-field {
+    width: 290px !important;
+    margin: 0 auto;
+  }
+}
+
+@media only screen and (min-width: 690px) {
+  .response-field {
+    width: 690px !important;
+    margin: 0 auto;
+  }
+}
+
+.full-page {
+  min-height: 100vh;
+}
+
+.inline-pre {
+  display: inline-block;
+}
+
+.inline-pre-narrow-button-like {
+  display: inline-block;
+  line-height: 0.2;
+  cursor: pointer;
+}
+@media only screen and (max-width: 500px) { // make aoptions buttons one full line (remove display block)
+  .inline-pre-narrow-button-like-wrapper {
+    display: block;
+  }
+}
+
+.spin {
+  animation:spin 4s linear infinite;
+}
+@keyframes spin { 
+  100% { 
+    -webkit-transform: rotate(360deg); transform:rotate(360deg); 
+  } 
+}
+@media only screen and (max-width: 500px) { // make aoptions buttons one full line (remove display block)
+  .go-button {
+    display: inline-block;
+      background-color: black; /* Green */
+      border: none;
+      color: white;
+      padding: 10px 10px;
+      border-radius: 100%;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+  }
+}
+@media only screen and (min-width: 690px) {
+  .go-button {
+    display: none;
+  }
+}
+
+.ui .button {
+  padding: 50px;
+}
+
+// Thanks to Rosa on Codepen: 
+// https://codepen.io/RRoberts/pen/pEXWEp
+
+/* ALL LOADERS */
+
+.loader{
+  width: 100px;
+  height: 100px;
+  border-radius: 100%;
+  position: relative;
+  margin: 0 auto;
+}
+
+/* LOADER 2 */
+
+#loader-2 span{
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 100%;
+  background-color: black;
+  margin: 35px 5px;
+}
+
+#loader-2 span:nth-child(1){
+  animation: bounce 1s ease-in-out infinite;
+}
+
+#loader-2 span:nth-child(2){
+  animation: bounce 1s ease-in-out 0.33s infinite;
+}
+
+#loader-2 span:nth-child(3){
+  animation: bounce 1s ease-in-out 0.66s infinite;
+}
+
+@keyframes bounce{
+  0%, 75%, 100%{
+    -webkit-transform: translateY(0);
+    -ms-transform: translateY(0);
+    -o-transform: translateY(0);
+    transform: translateY(0);
+  }
+
+  25%{
+    -webkit-transform: translateY(-20px);
+    -ms-transform: translateY(-20px);
+    -o-transform: translateY(-20px);
+    transform: translateY(-20px);
+  }
+}
+
+.footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: black;
+    color: white;
+    text-align: center;
+}
+
+a {
+  color: white !important;
+  text-decoration: underline !important;
+}
+
+.ui .button {
+  margin: 0.5em .5em .5em 0.5em !important;
+}
+
+.pre-like {
+  font-family: monospace,monospace !important;
+  font-size: 1em !important;
+  color: black !important;
+  font-weight: normal !important;
+}
+
+.ui-input-overrides > input {
+    font-family: 'ArialRoundedMTBold', Arial !important;
+    padding: .55em !important;
+    background: #fff;
+    border-bottom: 2px solid #E8E8E8 !important;
+    color: black !important;
+    border-radius: none !important;
+}
+
+::placeholder {
+  color: black !important;
+}

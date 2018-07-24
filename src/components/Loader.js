@@ -9,7 +9,6 @@ class Loader extends React.Component {
           <span></span>
           <span></span>
         </div>
-        <p className="text-center"><span role="img" aria-label="genie">🧞</span><span role="img" aria-label="genie">🧞</span><span role="img" aria-label="genie">🧞</span>The genie is thinking...<span role="img" aria-label="genie">🧞</span><span role="img" aria-label="genie">🧞</span><span role="img" aria-label="genie">🧞</span></p>
       </div>
     );
   }
