@@ -1,10 +1,4 @@
-# Whispy Frontend
+# Howdoi GUI
 
-This app was built with create-react-app. Here in root `frontend/` should start up simply with:
-
-`npm install`
-
-and
-
-`npm run start`
+This is a react / react-semantic-ui webapp of the ingenious [howdoi](https://github.com/gleitz/howdoi) commandline tool built by [gleitz](https://github.com/gleitz)
 

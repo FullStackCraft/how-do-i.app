@@ -26,27 +26,6 @@ pre code {
 	color: #333;
 }
 
-@media only screen and (max-width: 500px) {
-  .form-control {
-    color: black !important;
-    font-size: 30px;
-    font-family: 'ArialRoundedMTBold', serif;
-    width: 260px !important;
-    // margin: 0 auto;
-  }
-}
-
-@media only screen and (min-width: 690px) {
-  .form-control {
-    color: black !important;
-    font-size: 30px;
-    font-family: 'ArialRoundedMTBold', serif;
-    width: 660px !important;
-    // margin: 0 auto;
-  }
-}
-
-
 input[type="text"],
 select.form-control {
   background: transparent;
@@ -64,19 +43,6 @@ select.form-control:focus {
   box-shadow: none;
 }
 
-@media only screen and (max-width: 500px) {
-  .responsive-width {
-    width: 290px !important;
-    margin: 0 auto;
-  }
-}
-
-@media only screen and (min-width: 690px) {
-  .responsive-width {
-    width: 690px !important;
-    margin: 0 auto;
-  }
-}
 
 .full-page {
   min-height: 100vh;
@@ -171,25 +137,6 @@ select.form-control:focus {
     color: white;
     text-align: center;
 }
-@media only screen and (max-width: 500px) { // all phones
-  .footer {
-      font-size: 10px;
-  }
-}
-
-
-@media only screen and (max-width: 500px) { // all phones
-  .input-width input {
-      width: 280px !important;
-  }
-}
-
-@media only screen and (min-width: 690px) {
-  .input-width input {
-      width: 650px !important;
-  }
-}
-
 
 a {
   color: white !important;
@@ -207,17 +154,6 @@ a {
   font-weight: normal !important;
 }
 
-// .ui .input {
-//    input {
-//     font-family: 'ArialRoundedMTBold', Arial !important;
-//     padding: .55em !important;
-//     background: #fff;
-//     border: 0px 0px 0px 2px solid #E8E8E8 !important;
-//     color: black !important;
-//     border-radius: none !important;
-//   }
-// }
-
 ::placeholder {
   color: #C7C7C7 !important;
 }
@@ -225,3 +161,31 @@ a {
 .gray-text {
   color: #9B9B9B !important;
 }
+
+@media only screen and (max-width: 500px) { // all phones
+  .responsive-width {
+    width: 290px !important;
+    margin: 0 auto;
+  }
+  .input-width input {
+      width: 280px !important;
+  }
+  .footer {
+      font-size: 10px;
+  }
+}
+
+
+@media only screen and (min-width: 690px) { // everything else
+  .responsive-width {
+    width: 690px !important;
+    margin: 0 auto;
+  }
+  .input-width input {
+      width: 650px !important;
+  }
+  .button-offset {
+    style={{top: "-18px"}}
+  }
+}
+

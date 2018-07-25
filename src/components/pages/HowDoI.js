@@ -1,5 +1,5 @@
 import React from 'react'
-import { Container, Dropdown, Input, Button, Checkbox, Icon } from 'semantic-ui-react'
+import { Container, Dropdown, Input, Button, Checkbox, Icon, Divider } from 'semantic-ui-react'
 
 // custom components
 import Loader from '../Loader';
@@ -67,8 +67,10 @@ class HowDoI extends React.Component {
       sHelpActive: "",
       sColorizeActive: "",
       sFullTextActive: "",
-      sShowLinkActive: ""
+      sShowLinkActive: "",
+      sFavoritesActive: ""
     }
+    this.hydrateStateWithLocalStorage = this.hydrateStateWithLocalStorage.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleKeyPress = this.handleKeyPress.bind(this);  
     this.handleToggleCheck = this.handleToggleCheck.bind(this);
@@ -80,6 +82,27 @@ class HowDoI extends React.Component {
     this.clearQuestionResponseArray = this.clearQuestionResponseArray.bind(this);
     this.handleModalClose = this.handleModalClose.bind(this);
     this.handleToggleFavorite = this.handleToggleFavorite.bind(this);
+    this.handleDeleteFromFavorites = this.handleDeleteFromFavorites.bind(this);
+  }
+  // tasty function from https://hackernoon.com/how-to-take-advantage-of-local-storage-in-your-react-projects-a895f2b2d3f2 - thanks to Ryan Yost
+  hydrateStateWithLocalStorage() {
+    // for all items in state
+    for (let key in this.state) {
+      // if the key exists in localStorage
+      if (localStorage.hasOwnProperty(key)) {
+        // get the key's value from localStorage
+        let value = localStorage.getItem(key);
+
+        // parse the localStorage string and setState
+        try {
+          value = JSON.parse(value);
+          this.setState({ [key]: value });
+        } catch (e) {
+          // handle empty string
+          this.setState({ [key]: value });
+        }
+      }
+    }
   }
   handleInputChange(oEvent) {
       this.setState({ [oEvent.target.name]: oEvent.target.value });
@@ -127,7 +150,7 @@ class HowDoI extends React.Component {
   }
   howDoI() {
     this.setState({bLoading: true});
-    const { sInput, sLanguage, bIgnoreLanguage, iNumberAnswers, aQuestionResponse, sColorizeActive, sFullTextActive, sShowLinkActive } = this.state;
+    const { sInput, sLanguage, bIgnoreLanguage, iNumberAnswers, aQuestionResponse, aFavorites, sColorizeActive, sFullTextActive, sShowLinkActive } = this.state;
     let sInputMod = sInput;
     if (!bIgnoreLanguage) {
       sInputMod = sInputMod + " " + sLanguage; // append language to end of query
@@ -148,6 +171,8 @@ class HowDoI extends React.Component {
     .then((oResponse) => {
       let aResponses = oResponse.data.sResponse.split(sEQUALS);
       let sResponse = "";
+      let sFavoriteIconName = "star outline";
+      let sFavoriteText = "favorite";
       aResponses.reverse();
       if (aResponses.length === 1) {
         if (sColorizeActive === sON) {
@@ -157,8 +182,14 @@ class HowDoI extends React.Component {
         }
         if (sShowLinkActive === sON) {
           sResponse = '<a href="' + sResponse + '" target="_blank" rel="noopener noreferrer">' + sResponse + "</a>";
-        }
-        aQuestionResponse.unshift({sQuestion: sInputMod, iIndex: 0, sResponse: sResponse, sFavoriteIconName: "star outline"});
+        }  
+        aFavorites.forEach(oElement => {
+          if (oElement.sQuestion === sInputMod) {
+            sFavoriteIconName = "star"; // if the user has already saved this exact response in their favorites (maybe they forgot), mark it as such
+            sFavoriteText = "saved in favorites";
+          }
+        });
+        aQuestionResponse.unshift({sQuestion: sInputMod, iIndex: 0, sResponse: sResponse, sFavoriteIconName: sFavoriteIconName, sFavoriteText: sFavoriteText, bError: false});
       } else {
         aResponses.forEach((sResponse, iIndex) => {
           if (sColorizeActive === sON) {
@@ -169,13 +200,20 @@ class HowDoI extends React.Component {
           if (sShowLinkActive === sON) {
             sResponse = '<a href="' + sResponse + '" target="_blank" rel="noopener noreferrer">' + sResponse + "</a>";
           }
-          aQuestionResponse.unshift({sQuestion: sInputMod, iIndex: iIndex, sResponse: sResponse, sFavoriteIconName: "star outline"});
+          aFavorites.forEach(oElement => {
+            if (oElement.sQuestion === sInputMod) { // TODO: handle looped responses!!! the 
+              sFavoriteIconName = "star"; // if the user has already saved this exact response in their favorites (maybe they forgot), mark it as such
+              sFavoriteText = "saved in favorites";
+            }
+          });
+          // BUG: this assigning of squest to each is WRONG or at least not unique, will mess with favorites
+          aQuestionResponse.unshift({sQuestion: sInputMod, iIndex: iIndex, sResponse: sResponse, sFavoriteIconName: sFavoriteIconName, sFavoriteText: sFavoriteText, bError: false });
         });
       }
       this.setState({bLoading: false, aQuestionResponse: aQuestionResponse, sInput: ""});
     })
     .catch((error) => {
-      aQuestionResponse.unshift({sQuestion: sInputMod + " ERROR", sResponse: "error"});
+      aQuestionResponse.unshift({sQuestion: sInputMod, sResponse: "SERVER ERROR", bError: true});
       this.setState({bLoading: false, aQuestionResponse: aQuestionResponse, sInput: ""});
     });
   }
@@ -197,35 +235,72 @@ class HowDoI extends React.Component {
       this.setState({sFullTextActive: sOFF})
     }
   }
-  handleToggleFavorite(iIndex) {
+  handleToggleFavorite(iIndex) { // BUG: delete needs to work too!
     console.log("yahoooo");
     let aQuestionResponse = this.state.aQuestionResponse;
     let aFavorites = this.state.aFavorites;
-    aQuestionResponse[iIndex].sFavoriteIconName = aQuestionResponse[iIndex].sFavoriteIconName === "star outline" ? "star" : "star outline"; // toggle visual of if it is saved or not
-    aFavorites.push(aQuestionResponse[iIndex]); // push this response object to the favorites array
-    localStorage.setItem("favorites", JSON.stringify(aFavorites));
-    this.setState({ aQuestionResponse: aQuestionResponse, aFavorites: aFavorites });
+    let bKeyExists = false;
+    aFavorites.forEach(oElement => {
+      if (oElement.sQuestion === aQuestionResponse[iIndex].sQuestion) {
+        bKeyExists = true;
+      }
+    });
+    if (!bKeyExists) { // only add it to the favorites if the key exists - removes any issue of seeing multiple identical responses when show favorites is selected
+      aQuestionResponse[iIndex].sFavoriteIconName = aQuestionResponse[iIndex].sFavoriteIconName === "star outline" ? "star" : "star outline"; // toggle visual of if it is saved or not
+      aQuestionResponse[iIndex].sFavoriteText = aQuestionResponse[iIndex].sFavoriteText === "favorite" ? "saved in favorites" : "favorite";
+      aFavorites.push(aQuestionResponse[iIndex]); // push this response object to the favorites array
+      localStorage.setItem("aFavorites", JSON.stringify(aFavorites)); // based on hydrateStateWithLocalStorage(), it is essential that the name of the item is the same as the state, i.e. "aFavorites"!!!
+      this.setState({ aQuestionResponse: aQuestionResponse, aFavorites: aFavorites });
+    }
+  }
+  handleDeleteFromFavorites(iIndex) {
+    let aFavorites = this.state.aFavorites;
+    aFavorites.splice(iIndex, 1); // remove the favorite at this position in the favorite array
+    localStorage.setItem("aFavorites", JSON.stringify(aFavorites)); // based on hydrateStateWithLocalStorage(), it is essential that the name of the item is the same as the state, i.e. "aFavorites"!!!
+    this.setState({ aFavorites: aFavorites });
   }
   clearQuestionResponseArray() {
     this.setState({ aQuestionResponse: []}); // clear array
   }
   render () {
-    // <input className="form-control" placeholder="your query here..." type="text" name="sInput" value={sInput} onChange={this.handleInputChange} onKeyPress={this.handleKeyPress}/>
-    const { sInput, sLanguage, bIgnoreLanguage, iNumberAnswers, bLoading, aQuestionResponse, sHelpActive, sColorizeActive, sFullTextActive, sShowLinkActive, bModalOpen } = this.state;
+    const { sInput, sLanguage, bIgnoreLanguage, iNumberAnswers, bLoading, aQuestionResponse, aFavorites, sHelpActive, sColorizeActive, sFullTextActive, sShowLinkActive, sFavoritesActive, bModalOpen } = this.state;
     let sHelpFieldClass = sHelpActive === sON ? "help-field__shown response-field" : "help-field__hidden response-field";
     let sDropdownDescriptionClass = bIgnoreLanguage ? "gray-text" : ""; // gray description text if the language dropdown is disabled
     let aRunningList = [];
+    let aRunningFavoritesList = [];
     let sNumberDropdownText = 'No. answers (' + iNumberAnswers.toString() + ')';
     aQuestionResponse.forEach((oElement, iIndex) => {
-      aRunningList.push(<div key={iIndex} className="responsive-width">
+      if (oElement.bError) { // no favoriting or answer number on an error element
+        aRunningList.push(<div key={iIndex} className="responsive-width">
+        <div style={{display: "block", margin:"0 auto"}}>
+          <pre className="inline-pre">{aQuestionResponse[iIndex].sQuestion}</pre> 
+        </div>
+        <pre className="responsive-width">
+            <div dangerouslySetInnerHTML={{ __html: aQuestionResponse[iIndex].sResponse }} />
+          </pre>  
+        </div>);
+      } else {
+        aRunningList.push(<div key={iIndex} className="responsive-width">
+        <div style={{display: "block", margin:"0 auto", height:"50px"}}>
+          <pre className="inline-pre">{aQuestionResponse[iIndex].sQuestion}</pre> <pre className="inline-pre">Answer #{aQuestionResponse[iIndex].iIndex + 1}</pre> <Button className="pre-like button-offset" color='yellow' icon labelPosition="right" onClick={() => this.handleToggleFavorite(iIndex)}><Icon name={aQuestionResponse[iIndex].sFavoriteIconName}/>{aQuestionResponse[iIndex].sFavoriteText}</Button>
+        </div>
+        <pre className="responsive-width">
+            <div dangerouslySetInnerHTML={{ __html: aQuestionResponse[iIndex].sResponse }} />
+          </pre>  
+        </div>);
+      }
+    });
+    aFavorites.forEach((oElement, iIndex) => {
+      aRunningFavoritesList.push(<div key={iIndex} className="responsive-width">
       <div style={{display: "block", margin:"0 auto"}}>
-        <pre className="inline-pre">{aQuestionResponse[iIndex].sQuestion}</pre> <pre className="inline-pre">Answer #{aQuestionResponse[iIndex].iIndex + 1}</pre> <Button className="pre-like" icon labelPosition="right" onClick={() => this.handleToggleFavorite(iIndex)}><Icon name={aQuestionResponse[iIndex].sFavoriteIconName}/>favorite</Button>
+        <pre className="inline-pre">{aFavorites[iIndex].sQuestion}</pre> <pre className="inline-pre">Answer #{aFavorites[iIndex].iIndex + 1}</pre> <pre className="inline-pre">Favorite #{(iIndex + 1).toString()}</pre> <Button className="pre-like" icon labelPosition="right" onClick={() => this.handleDeleteFromFavorites(iIndex)} negative><Icon name="delete"/>delete from favorites</Button>
       </div>
       <pre className="responsive-width">
-          <div dangerouslySetInnerHTML={{ __html: aQuestionResponse[iIndex].sResponse }} />
+          <div dangerouslySetInnerHTML={{ __html: aFavorites[iIndex].sResponse }} />
         </pre>  
       </div>);
     });
+    let oFavorites = aRunningFavoritesList.length > 0 ? aRunningFavoritesList : <div><br/><p className="text-center">You haven't favorited anything! Star up some coolio code pieces!</p></div>;
     return (
       <div>
         <Container>
@@ -279,6 +354,7 @@ class HowDoI extends React.Component {
                   <Button className="pre-like" onClick={() => this.toggleOption("sColorizeActive")}>colorize responses{sColorizeActive}</Button>
                   <Button className="pre-like" onClick={() => this.toggleOption("sFullTextActive")}>show full text{sFullTextActive}</Button>
                   <Button className="pre-like" onClick={() => this.toggleOption("sShowLinkActive")}>show link only{sShowLinkActive}</Button>  
+                  <Button className="pre-like" onClick={() => this.toggleOption("sFavoritesActive")}>show <span style={{color:"#fbbd08"}}>favorites</span>{sFavoritesActive}</Button>  
               </div>
                 <div className="responsive-width">
                   { sHelpActive === sON && 
@@ -289,9 +365,12 @@ class HowDoI extends React.Component {
                     <span>***Any of these flags will still work in the query field, but note that all of them can also be handled by setting the various controls.</span>
                   </div>}
                 </div>
-                { bLoading === true && <Loader/> }
-                { aRunningList.length > 0 && 
-                aRunningList }    
+                <Divider />
+                <div className="responsive-width">
+                  { sFavoritesActive === sON && oFavorites }      
+                  { bLoading === true && <Loader/> }
+                  { (sFavoritesActive === sOFF || sFavoritesActive === "") && aRunningList.length > 0 && aRunningList }    
+                </div>
                 <br/>
                 <br/>  
                 <br/>  
@@ -303,7 +382,7 @@ class HowDoI extends React.Component {
     )
   }
   componentDidMount() {
-    
+    this.hydrateStateWithLocalStorage();
   }
 }
 
