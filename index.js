@@ -11,7 +11,19 @@ var oCorsOptions = {
   origin: ['http://how-do-i.app', 'http://localhost:3000']
 }
 const exec = require('child_process').exec;
+const nodemailer = require('nodemailer');
 
+let oTransporter = nodemailer.createTransport({
+ service: 'gmail',
+ auth: {
+        user: 'frewin.christopher@gmail.com',
+        pass: process.env.GMAIL_PASSWORD
+    }
+});
+let oMailOptions = {
+  from: 'frewin.christopher@gmail.com', // sender address
+  to: 'frewin.christopher@gmail.com' // list of receivers
+};
 
 // user cors options
 app.use(cors(oCorsOptions));
@@ -34,6 +46,22 @@ app.post('/howdoi', (req, res) => {
         res.send(JSON.stringify(oResponse));
      }
    });
+});
+
+app.post('/request', (req, res) => {
+  console.log(req.body.sRequestLanguage);
+  console.log(req.body.sRequestEmail);
+  oMailOptions.subject = 'How-do-i.app - New language / framework / tool request!'; // Subject line
+  oMailOptions.html = "Requested language / framework / tool: " + req.body.sRequestLanguage + "<br/><br/>Requester: " + req.body.sRequestEmail; // plain text body
+  console.log(oMailOptions);
+  oTransporter.sendMail(oMailOptions, function (err, info) {
+     if (err) {
+       console.log(err);
+     } else {
+       console.log(info);
+     }
+  });
+  res.sendStatus(200);
 });
 
 // Serve static assets

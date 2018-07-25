@@ -1,14 +1,15 @@
 import React from 'react'
-import { Container, Dropdown, Input, Button, Grid } from 'semantic-ui-react'
+import { Container, Dropdown, Input, Button, Checkbox, Icon } from 'semantic-ui-react'
 
 // custom components
 import Loader from '../Loader';
+import RequestModal from './RequestModal';
 
 // requires
 let logoContrast = require('../../images/howdoi.svg');
 const axios = require('axios');
 var AU = require('ansi_up');
-var ansi_up = new AU.default;
+var ansi_up = new AU.default();
 
 const options = [
   { key: 'javascript', text: 'javascript', value: 'javascript' },
@@ -26,7 +27,8 @@ const options = [
   { key: 'nginx', text: 'nginx', value: 'nginx' },
   { key: 'bash', text: 'bash', value: 'bash' },
   { key: 'ruby', text: 'ruby', value: 'ruby' },
-  { key: 'perl', text: 'perl', value: 'perl' }
+  { key: 'perl', text: 'perl', value: 'perl' },
+  { key: 'request', text: '(Request a language / framework / tool)!', value: '(Request a language / framework / tool)!' }  
 ]
 
 // program constants
@@ -51,34 +53,33 @@ optional arguments:
   -C, --clear-cache     clear the cache
   -v, --version         displays the current version of howdoi`;
 
-class Landing extends React.Component {
+class HowDoI extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       sInput: "",
       sLanguage: "javascript",
+      bIgnoreLanguage: false,
       iNumberAnswers: 1,
       bLoading: false,
       aQuestionResponse: [],
+      aFavorites: [],
       sHelpActive: "",
       sColorizeActive: "",
       sFullTextActive: "",
       sShowLinkActive: ""
     }
-    this.goToPage = this.goToPage.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleKeyPress = this.handleKeyPress.bind(this);  
+    this.handleToggleCheck = this.handleToggleCheck.bind(this);
     this.toggleOption = this.toggleOption.bind(this);
     this.howDoI = this.howDoI.bind(this);
     this.handleButtonPress = this.handleButtonPress.bind(this);
     this.handleDropdownChange = this.handleDropdownChange.bind(this);
     this.handleDropdownCountChange = this.handleDropdownCountChange.bind(this);
-    this.clearAQuestionResponse = this.clearAQuestionResponse.bind(this);
-  }
-  goToPage(sPage) {
-    this.props.history.push({
-      pathname: sPage
-    });
+    this.clearQuestionResponseArray = this.clearQuestionResponseArray.bind(this);
+    this.handleModalClose = this.handleModalClose.bind(this);
+    this.handleToggleFavorite = this.handleToggleFavorite.bind(this);
   }
   handleInputChange(oEvent) {
       this.setState({ [oEvent.target.name]: oEvent.target.value });
@@ -88,14 +89,18 @@ class Landing extends React.Component {
     let sTextContent;
     if (oEvent.target.textContent.length > 50) { // when user 'anti' clicks not on the dropdown - just keep current language as defined by state
       sTextContent = sLanguage;
+    } else if (oEvent.target.textContent === "(Request a language / framework / tool)!") {
+      this.setState({bModalOpen: true});
+      sTextContent = sLanguage;
     } else {
       sTextContent = oEvent.target.textContent;
     }
     this.setState({ sLanguage: sTextContent });
   }
+  handleModalClose() {
+      this.setState({bModalOpen: false});
+  }
   handleDropdownCountChange(oEvent) {
-    console.log('here');
-    console.log(oEvent.target.textContent)
     const { iNumberAnswers } = this.state;
     let sTextContent;
     if (oEvent.target.textContent.length > 2) { // when user 'anti' clicks not on the dropdown - just keep current language as defined by state
@@ -103,11 +108,13 @@ class Landing extends React.Component {
     } else {
       sTextContent = oEvent.target.textContent;
     }
-    this.setState({ iNumberAnswers: parseInt(sTextContent) });
+    this.setState({ iNumberAnswers: parseInt(sTextContent,0) });
+  }
+  handleToggleCheck() {
+    this.setState({ bIgnoreLanguage: !this.state.bIgnoreLanguage });
   }
   handleKeyPress(event) {
-    const { aQuestionResponse, sColorizeActive, sShowLinkActive } = this.state;
-    let { sInput } = this.state;
+    const { sInput } = this.state;
     if (event.key === 'Enter' && sInput !== "") {
       this.howDoI();
     }
@@ -119,25 +126,26 @@ class Landing extends React.Component {
     }
   }
   howDoI() {
-    const { sLanguage, iNumberAnswers, aQuestionResponse, sColorizeActive, sFullTextActive, sShowLinkActive } = this.state;
-    let { sInput } = this.state;
-    sInput = sInput + " " + sLanguage; // append language to end of query
-    sInput = sInput + " -n " + iNumberAnswers.toString(); // and number of answers, even if it is one
     this.setState({bLoading: true});
+    const { sInput, sLanguage, bIgnoreLanguage, iNumberAnswers, aQuestionResponse, sColorizeActive, sFullTextActive, sShowLinkActive } = this.state;
+    let sInputMod = sInput;
+    if (!bIgnoreLanguage) {
+      sInputMod = sInputMod + " " + sLanguage; // append language to end of query
+    }
     if (sColorizeActive === sON) {
-      sInput = sInput + " -c"; // append colorize flag to command
+      sInputMod = sInputMod + " -c"; // append colorize flag to command
     }
     if (sFullTextActive === sON) {
-      sInput = sInput + " -a"; // append full text flag to command
+      sInputMod = sInputMod + " -a"; // append full text flag to command
     }
     if (sShowLinkActive === sON) {
-      sInput = sInput + " -l"; // append link flag to command
+      sInputMod = sInputMod + " -l"; // append link flag to command
     }
+    sInputMod = sInputMod + " -n " + iNumberAnswers.toString(); // and number of answers, even if it is one
     axios.post(process.env.REACT_APP_ROOT_URL + '/howdoi', {
-      sInput: sInput
+      sInput: sInputMod
     })
     .then((oResponse) => {
-      console.log(oResponse.data);
       let aResponses = oResponse.data.sResponse.split(sEQUALS);
       let sResponse = "";
       aResponses.reverse();
@@ -150,7 +158,7 @@ class Landing extends React.Component {
         if (sShowLinkActive === sON) {
           sResponse = '<a href="' + sResponse + '" target="_blank" rel="noopener noreferrer">' + sResponse + "</a>";
         }
-        aQuestionResponse.unshift({sQuestion: sInput, iIndex: 0, sResponse: sResponse});
+        aQuestionResponse.unshift({sQuestion: sInputMod, iIndex: 0, sResponse: sResponse, sFavoriteIconName: "star outline"});
       } else {
         aResponses.forEach((sResponse, iIndex) => {
           if (sColorizeActive === sON) {
@@ -161,13 +169,13 @@ class Landing extends React.Component {
           if (sShowLinkActive === sON) {
             sResponse = '<a href="' + sResponse + '" target="_blank" rel="noopener noreferrer">' + sResponse + "</a>";
           }
-          aQuestionResponse.unshift({sQuestion: sInput, iIndex: iIndex, sResponse: sResponse});
+          aQuestionResponse.unshift({sQuestion: sInputMod, iIndex: iIndex, sResponse: sResponse, sFavoriteIconName: "star outline"});
         });
       }
       this.setState({bLoading: false, aQuestionResponse: aQuestionResponse, sInput: ""});
     })
     .catch((error) => {
-      aQuestionResponse.unshift({sQuestion: sInput + " ERROR", sResponse: "error"});
+      aQuestionResponse.unshift({sQuestion: sInputMod + " ERROR", sResponse: "error"});
       this.setState({bLoading: false, aQuestionResponse: aQuestionResponse, sInput: ""});
     });
   }
@@ -182,24 +190,40 @@ class Landing extends React.Component {
     if (sValue === sOFF) {
       this.setState({[sOption]: sON});
     }
+    if (sOption === "sFullTextActive") {
+      this.setState({sShowLinkActive: sOFF})
+    }
+    if (sOption === "sShowLinkActive") {
+      this.setState({sFullTextActive: sOFF})
+    }
   }
-  clearAQuestionResponse() {
-    console.log("clearing...")
+  handleToggleFavorite(iIndex) {
+    console.log("yahoooo");
+    let aQuestionResponse = this.state.aQuestionResponse;
+    let aFavorites = this.state.aFavorites;
+    aQuestionResponse[iIndex].sFavoriteIconName = aQuestionResponse[iIndex].sFavoriteIconName === "star outline" ? "star" : "star outline"; // toggle visual of if it is saved or not
+    aFavorites.push(aQuestionResponse[iIndex]); // push this response object to the favorites array
+    localStorage.setItem("favorites", JSON.stringify(aFavorites));
+    this.setState({ aQuestionResponse: aQuestionResponse, aFavorites: aFavorites });
+  }
+  clearQuestionResponseArray() {
     this.setState({ aQuestionResponse: []}); // clear array
   }
   render () {
     // <input className="form-control" placeholder="your query here..." type="text" name="sInput" value={sInput} onChange={this.handleInputChange} onKeyPress={this.handleKeyPress}/>
-    const { sInput, sLanguage, iNumberAnswers, bLoading, aQuestionResponse, sHelpActive, sColorizeActive, sFullTextActive, sShowLinkActive } = this.state;
+    const { sInput, sLanguage, bIgnoreLanguage, iNumberAnswers, bLoading, aQuestionResponse, sHelpActive, sColorizeActive, sFullTextActive, sShowLinkActive, bModalOpen } = this.state;
     let sHelpFieldClass = sHelpActive === sON ? "help-field__shown response-field" : "help-field__hidden response-field";
+    let sDropdownDescriptionClass = bIgnoreLanguage ? "gray-text" : ""; // gray description text if the language dropdown is disabled
     let aRunningList = [];
     let sNumberDropdownText = 'No. answers (' + iNumberAnswers.toString() + ')';
     aQuestionResponse.forEach((oElement, iIndex) => {
-      aRunningList.push(<div key={iIndex} className="response-field">
-        <pre className="inline-pre">{aQuestionResponse[iIndex].sQuestion}</pre> <pre className="inline-pre">Position {aQuestionResponse[iIndex].iIndex + 1}</pre>
-        <pre className="response-field">
+      aRunningList.push(<div key={iIndex} className="responsive-width">
+      <div style={{display: "block", margin:"0 auto"}}>
+        <pre className="inline-pre">{aQuestionResponse[iIndex].sQuestion}</pre> <pre className="inline-pre">Answer #{aQuestionResponse[iIndex].iIndex + 1}</pre> <Button className="pre-like" icon labelPosition="right" onClick={() => this.handleToggleFavorite(iIndex)}><Icon name={aQuestionResponse[iIndex].sFavoriteIconName}/>favorite</Button>
+      </div>
+      <pre className="responsive-width">
           <div dangerouslySetInnerHTML={{ __html: aQuestionResponse[iIndex].sResponse }} />
-        </pre>
-        
+        </pre>  
       </div>);
     });
     return (
@@ -210,18 +234,23 @@ class Landing extends React.Component {
               <h2 className="text-center">How Do I...</h2>
               <p className="text-center">Type any coding question into the form and press enter or submit!</p>
               <Input
-                className="text-center ui-input-overrides input-width"
+                className="text-center input-width"
                 style={{display: "block", margin:"0 auto"}}
                 type="text"
                 name="sInput"
                 value={sInput}
                 onChange={this.handleInputChange}
                 onKeyPress={this.handleKeyPress}
-                label={<Dropdown options={options} value={sLanguage} name="sLanguage" onChange={this.handleDropdownChange}/>}
-                labelPosition='right'
                 placeholder='your query here...'
               />
+              <br/>
               <div className="text-center" style={{display: "block", margin:"0 auto"}}>
+              <span className={sDropdownDescriptionClass}>fix language / tool / framework to: </span><Dropdown options={options} value={sLanguage} name="sLanguage" onChange={this.handleDropdownChange} disabled={bIgnoreLanguage}/>
+              <br/>
+              <br/>
+              <Checkbox label="Ignore the dropdown, I'll type the language / tool / framework myself" checked={bIgnoreLanguage} onChange={this.handleToggleCheck} />
+              <br/>
+              <br/>
               <Button onClick={this.handleButtonPress} secondary>
                 submit
               </Button>
@@ -241,7 +270,7 @@ class Landing extends React.Component {
                   </Dropdown.Menu>
                 </Dropdown.Menu>
               </Dropdown>
-              <Button onClick={this.clearAQuestionResponse} negative>clear responses</Button> 
+              <Button onClick={this.clearQuestionResponseArray} negative>clear responses</Button> 
               </div>
               <br/>
               <p className="text-center">Other options (click to toggle):</p>
@@ -251,18 +280,31 @@ class Landing extends React.Component {
                   <Button className="pre-like" onClick={() => this.toggleOption("sFullTextActive")}>show full text{sFullTextActive}</Button>
                   <Button className="pre-like" onClick={() => this.toggleOption("sShowLinkActive")}>show link only{sShowLinkActive}</Button>  
               </div>
-                <div className="response-field">
-                  { sHelpActive === sON && <pre className={sHelpFieldClass}>
-                    {sHELP_STRING}
-                  </pre> }
+                <div className="responsive-width">
+                  { sHelpActive === sON && 
+                  <div>
+                    <pre className={sHelpFieldClass}>
+                      {sHELP_STRING}
+                    </pre> 
+                    <span>***Any of these flags will still work in the query field, but note that all of them can also be handled by setting the various controls.</span>
+                  </div>}
                 </div>
                 { bLoading === true && <Loader/> }
                 { aRunningList.length > 0 && 
-                aRunningList }      
+                aRunningList }    
+                <br/>
+                <br/>  
+                <br/>  
+                <br/>  
+                <br/>    
           </Container>
+          <RequestModal bModalOpen={bModalOpen} options={options} closeModalFunction={this.handleModalClose}/>
         </div>
     )
   }
+  componentDidMount() {
+    
+  }
 }
 
-export default Landing;
+export default HowDoI;

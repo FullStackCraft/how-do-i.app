@@ -1,17 +1,15 @@
 import React, { Component } from 'react';
-import { CookiesProvider } from 'react-cookie';
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import './styles/App.css';
 
 // custom components
-import Landing from './components/pages/Landing';
+import HowDoI from './components/pages/HowDoI';
 import Footer from './components/Footer';
 
 class App extends Component {
   render() {
     return (
       <div>
-        <Landing/>
+        <HowDoI/>
         <Footer/>
       </div>
     );

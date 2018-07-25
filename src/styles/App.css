@@ -52,12 +52,12 @@ select.form-control:focus {
   box-shadow: none; }
 
 @media only screen and (max-width: 500px) {
-  .response-field {
+  .responsive-width {
     width: 290px !important;
     margin: 0 auto; } }
 
 @media only screen and (min-width: 690px) {
-  .response-field {
+  .responsive-width {
     width: 690px !important;
     margin: 0 auto; } }
 
@@ -83,24 +83,6 @@ select.form-control:focus {
   100% {
     -webkit-transform: rotate(360deg);
     transform: rotate(360deg); } }
-
-@media only screen and (max-width: 500px) {
-  .go-button {
-    display: inline-block;
-    background-color: black;
-    /* Green */
-    border: none;
-    color: white;
-    padding: 10px 10px;
-    border-radius: 100%;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px; } }
-
-@media only screen and (min-width: 690px) {
-  .go-button {
-    display: none; } }
 
 .ui .button {
   padding: 50px; }
@@ -157,8 +139,12 @@ select.form-control:focus {
     font-size: 10px; } }
 
 @media only screen and (max-width: 500px) {
-  .input-width {
-    width: 100px !important; } }
+  .input-width input {
+    width: 280px !important; } }
+
+@media only screen and (min-width: 690px) {
+  .input-width input {
+    width: 650px !important; } }
 
 a {
   color: white !important;
@@ -173,13 +159,8 @@ a {
   color: black !important;
   font-weight: normal !important; }
 
-.ui-input-overrides > input {
-  font-family: 'ArialRoundedMTBold', Arial !important;
-  padding: .55em !important;
-  background: #fff;
-  border-bottom: 2px solid #E8E8E8 !important;
-  color: black !important;
-  border-radius: none !important; }
-
 ::placeholder {
-  color: black !important; }
+  color: #C7C7C7 !important; }
+
+.gray-text {
+  color: #9B9B9B !important; }
