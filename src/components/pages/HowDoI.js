@@ -154,7 +154,7 @@ class HowDoI extends React.Component {
   howDoI() {
     this.setState({bLoading: true});
     const { sInput, sLanguage, bIgnoreLanguage, iNumberAnswers, aQuestionResponse, aFavorites, sColorizeActive, sFullTextActive, sShowLinkActive } = this.state;
-    let sInputMod = sInput;
+    let sInputMod = sInput.trim(); // remove leading and trailing space
     if (!bIgnoreLanguage) {
       sInputMod = sInputMod + " " + sLanguage; // append language to end of query
     }
@@ -187,7 +187,7 @@ class HowDoI extends React.Component {
           sResponse = '<a href="' + sResponse + '" target="_blank" rel="noopener noreferrer">' + sResponse + "</a>";
         }  
         aFavorites.forEach(oElement => {
-          if (oElement.sQuestion === sInputMod) {
+          if (oElement.sQuestion === sInputMod && oElement.iIndex === 0) {
             sFavoriteIconName = "star"; // if the user has already saved this exact response in their favorites (maybe they forgot), mark it as such
             sFavoriteText = "saved in favorites";
           }
@@ -204,7 +204,7 @@ class HowDoI extends React.Component {
             sResponse = '<a href="' + sResponse + '" target="_blank" rel="noopener noreferrer">' + sResponse + "</a>";
           }
           aFavorites.forEach(oElement => {
-            if (oElement.sQuestion === sInputMod) { // TODO: handle looped responses!!! the 
+            if (oElement.sQuestion === sInputMod && oElement.iIndex === iIndex) { // TODO: handle looped responses!!! the 
               sFavoriteIconName = "star"; // if the user has already saved this exact response in their favorites (maybe they forgot), mark it as such
               sFavoriteText = "saved in favorites";
             }
@@ -244,7 +244,7 @@ class HowDoI extends React.Component {
     let aFavorites = this.state.aFavorites;
     let bKeyExists = false;
     aFavorites.forEach(oElement => {
-      if (oElement.sQuestion === aQuestionResponse[iIndex].sQuestion) {
+      if (oElement.sQuestion === aQuestionResponse[iIndex].sQuestion && oElement.iIndex === aQuestionResponse[iIndex].iIndex) {
         bKeyExists = true;
       }
     });
@@ -284,7 +284,7 @@ class HowDoI extends React.Component {
           <pre className="inline-pre">{aQuestionResponse[iIndex].sQuestion}</pre> 
         </div>
         <pre className="responsive-width">
-            <div dangerouslySetInnerHTML={{ __html: aQuestionResponse[iIndex].sResponse }} />
+            { sColorizeActive === sON ? <div dangerouslySetInnerHTML={{ __html: aQuestionResponse[iIndex].sResponse }} /> : aQuestionResponse[iIndex].sResponse }
           </pre>  
         </div>);
       } else {
@@ -293,7 +293,7 @@ class HowDoI extends React.Component {
           <pre className="inline-pre">{aQuestionResponse[iIndex].sQuestion}</pre> <pre className="inline-pre">Answer #{aQuestionResponse[iIndex].iIndex + 1}</pre> <Button className="pre-like button-offset" color='yellow' icon labelPosition="right" onClick={() => this.handleToggleFavorite(iIndex)}><Icon name={aQuestionResponse[iIndex].sFavoriteIconName}/>{aQuestionResponse[iIndex].sFavoriteText}</Button>
         </div>
         <pre className="responsive-width">
-            <div dangerouslySetInnerHTML={{ __html: aQuestionResponse[iIndex].sResponse }} />
+            { sColorizeActive === sON ? <div dangerouslySetInnerHTML={{ __html: aQuestionResponse[iIndex].sResponse }} /> : aQuestionResponse[iIndex].sResponse }
           </pre>  
         </div>);
       }
@@ -304,7 +304,7 @@ class HowDoI extends React.Component {
         <pre className="inline-pre">{aFavorites[iIndex].sQuestion}</pre> <pre className="inline-pre">Answer #{aFavorites[iIndex].iIndex + 1}</pre> <pre className="inline-pre">Favorite #{(iIndex + 1).toString()}</pre> <Button className="pre-like" icon labelPosition="right" onClick={() => this.handleDeleteFromFavorites(iIndex)} negative><Icon name="delete"/>delete from favorites</Button>
       </div>
       <pre className="responsive-width">
-          <div dangerouslySetInnerHTML={{ __html: aFavorites[iIndex].sResponse }} />
+          { sColorizeActive === sON ? <div dangerouslySetInnerHTML={{ __html: aFavorites[iIndex].sResponse }} /> : aFavorites[iIndex].sResponse }
         </pre>  
       </div>);
     });
