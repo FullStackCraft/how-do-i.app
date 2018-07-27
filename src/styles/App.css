@@ -22,20 +22,6 @@ pre code {
   padding: 10px;
   color: #333; }
 
-@media only screen and (max-width: 500px) {
-  .form-control {
-    color: black !important;
-    font-size: 30px;
-    font-family: 'ArialRoundedMTBold', serif;
-    width: 260px !important; } }
-
-@media only screen and (min-width: 690px) {
-  .form-control {
-    color: black !important;
-    font-size: 30px;
-    font-family: 'ArialRoundedMTBold', serif;
-    width: 660px !important; } }
-
 input[type="text"],
 select.form-control {
   background: transparent;
@@ -50,16 +36,6 @@ input[type="text"]:focus,
 select.form-control:focus {
   -webkit-box-shadow: none;
   box-shadow: none; }
-
-@media only screen and (max-width: 500px) {
-  .responsive-width {
-    width: 290px !important;
-    margin: 0 auto; } }
-
-@media only screen and (min-width: 690px) {
-  .responsive-width {
-    width: 690px !important;
-    margin: 0 auto; } }
 
 .full-page {
   min-height: 100vh; }
@@ -134,18 +110,6 @@ select.form-control:focus {
   color: white;
   text-align: center; }
 
-@media only screen and (max-width: 500px) {
-  .footer {
-    font-size: 10px; } }
-
-@media only screen and (max-width: 500px) {
-  .input-width input {
-    width: 280px !important; } }
-
-@media only screen and (min-width: 690px) {
-  .input-width input {
-    width: 650px !important; } }
-
 a {
   color: white !important;
   text-decoration: underline !important; }
@@ -164,3 +128,25 @@ a {
 
 .gray-text {
   color: #9B9B9B !important; }
+
+@media only screen and (max-width: 500px) {
+  .responsive-width {
+    width: 290px !important;
+    margin: 0 auto; }
+  .input-width input {
+    width: 280px !important; }
+  .footer {
+    font-size: 10px; }
+  .button-offset {
+    top: -18px; } }
+
+@media only screen and (min-width: 690px) {
+  .responsive-width {
+    width: 690px !important;
+    margin: 0 auto; }
+  .input-width input {
+    width: 650px !important; }
+  .button-offset {
+    top: -18px; }
+  .responsive-height {
+    height: 50px; } }

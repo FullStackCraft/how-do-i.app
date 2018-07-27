@@ -22,9 +22,15 @@ class RequestModal extends React.Component {
     this.handleInputChange = this.handleInputChange.bind(this);
     this.sendEmail = this.sendEmail.bind(this);
     this.handleConfirmationModalClose = this.handleConfirmationModalClose.bind(this);
+    this.handleKeyPress = this.handleKeyPress.bind(this);
   }
   handleInputChange(oEvent) {
       this.setState({ [oEvent.target.name]: oEvent.target.value });
+  }
+  handleKeyPress(event) {
+    if (event.key === 'Enter') {
+      this.checkForm();
+    }
   }
   checkForm() {
     this.setState({bLanguageEmpty: false, bEmailEmpty: false, bLanguageError: false, bEmailError: false}); // initialize form state
@@ -95,7 +101,7 @@ class RequestModal extends React.Component {
              <Form error={bLanguageError}>
                <Form.Field error={bLanguageEmpty}>
                  <label>language / framework / tool</label>
-                 <input onChange={this.handleInputChange} name="sRequestLanguage" placeholder='python' value={sRequestLanguage}/>
+                 <input onChange={this.handleInputChange} onKeyPress={this.handleKeyPress} name="sRequestLanguage" placeholder='python' value={sRequestLanguage}/>
                </Form.Field>
                <Message
                  error
@@ -106,7 +112,7 @@ class RequestModal extends React.Component {
             <Form error={bEmailError}>
                <Form.Field error={bEmailEmpty}>
                  <label>your email</label>
-                 <input onChange={this.handleInputChange} name="sRequestEmail" placeholder='you@yours.com' value={sRequestEmail}/>
+                 <input onChange={this.handleInputChange} onKeyPress={this.handleKeyPress} name="sRequestEmail" placeholder='you@yours.com' value={sRequestEmail}/>
                </Form.Field>
                <Message
                  error

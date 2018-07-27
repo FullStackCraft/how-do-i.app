@@ -173,6 +173,9 @@ a {
   .footer {
       font-size: 10px;
   }
+  .button-offset {
+    top: -18px;
+  }
 }
 
 
@@ -185,7 +188,10 @@ a {
       width: 650px !important;
   }
   .button-offset {
-    style={{top: "-18px"}}
+    top: -18px;
+  }
+  .responsive-height {
+    height: 50px;
   }
 }
 

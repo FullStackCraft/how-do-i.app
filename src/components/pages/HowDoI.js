@@ -63,6 +63,8 @@ class HowDoI extends React.Component {
       iNumberAnswers: 1,
       bLoading: false,
       aQuestionResponse: [],
+      aBackupQuestionResponse: [],
+      bShowUndo: false,
       aFavorites: [],
       sHelpActive: "",
       sColorizeActive: "",
@@ -83,6 +85,7 @@ class HowDoI extends React.Component {
     this.handleModalClose = this.handleModalClose.bind(this);
     this.handleToggleFavorite = this.handleToggleFavorite.bind(this);
     this.handleDeleteFromFavorites = this.handleDeleteFromFavorites.bind(this);
+    this.restoreOldQuestionResponseArray = this.restoreOldQuestionResponseArray.bind(this);
   }
   // tasty function from https://hackernoon.com/how-to-take-advantage-of-local-storage-in-your-react-projects-a895f2b2d3f2 - thanks to Ryan Yost
   hydrateStateWithLocalStorage() {
@@ -260,10 +263,15 @@ class HowDoI extends React.Component {
     this.setState({ aFavorites: aFavorites });
   }
   clearQuestionResponseArray() {
-    this.setState({ aQuestionResponse: []}); // clear array
+    if (this.state.aQuestionResponse.length > 0) { // only make backup if there is actually something to backup
+      this.setState({ aQuestionResponse: [], aBackupQuestionResponse: this.state.aQuestionResponse, bShowUndo: true}); // clear array, show
+    } 
+  }
+  restoreOldQuestionResponseArray() {
+    this.setState({ aQuestionResponse: this.state.aBackupQuestionResponse, aBackupQuestionResponse: [], bShowUndo: false}); // clear array, show
   }
   render () {
-    const { sInput, sLanguage, bIgnoreLanguage, iNumberAnswers, bLoading, aQuestionResponse, aFavorites, sHelpActive, sColorizeActive, sFullTextActive, sShowLinkActive, sFavoritesActive, bModalOpen } = this.state;
+    const { sInput, sLanguage, bIgnoreLanguage, iNumberAnswers, bLoading, aQuestionResponse, aFavorites, sHelpActive, sColorizeActive, sFullTextActive, sShowLinkActive, sFavoritesActive, bModalOpen, bShowUndo } = this.state;
     let sHelpFieldClass = sHelpActive === sON ? "help-field__shown response-field" : "help-field__hidden response-field";
     let sDropdownDescriptionClass = bIgnoreLanguage ? "gray-text" : ""; // gray description text if the language dropdown is disabled
     let aRunningList = [];
@@ -281,7 +289,7 @@ class HowDoI extends React.Component {
         </div>);
       } else {
         aRunningList.push(<div key={iIndex} className="responsive-width">
-        <div style={{display: "block", margin:"0 auto", height:"50px"}}>
+        <div style={{display: "block", margin:"0 auto"}} className="responsive-height">
           <pre className="inline-pre">{aQuestionResponse[iIndex].sQuestion}</pre> <pre className="inline-pre">Answer #{aQuestionResponse[iIndex].iIndex + 1}</pre> <Button className="pre-like button-offset" color='yellow' icon labelPosition="right" onClick={() => this.handleToggleFavorite(iIndex)}><Icon name={aQuestionResponse[iIndex].sFavoriteIconName}/>{aQuestionResponse[iIndex].sFavoriteText}</Button>
         </div>
         <pre className="responsive-width">
@@ -320,7 +328,7 @@ class HowDoI extends React.Component {
               />
               <br/>
               <div className="text-center" style={{display: "block", margin:"0 auto"}}>
-              <span className={sDropdownDescriptionClass}>fix language / tool / framework to: </span><Dropdown options={options} value={sLanguage} name="sLanguage" onChange={this.handleDropdownChange} disabled={bIgnoreLanguage}/>
+              <span className={sDropdownDescriptionClass}><i>fix language / tool / framework to: </i></span><Dropdown options={options} value={sLanguage} name="sLanguage" onChange={this.handleDropdownChange} disabled={bIgnoreLanguage}/>
               <br/>
               <br/>
               <Checkbox label="Ignore the dropdown, I'll type the language / tool / framework myself" checked={bIgnoreLanguage} onChange={this.handleToggleCheck} />
@@ -329,6 +337,7 @@ class HowDoI extends React.Component {
               <Button onClick={this.handleButtonPress} secondary>
                 submit
               </Button>
+              <br/>
               <Dropdown text={sNumberDropdownText} floating labeled button className='icon' value={iNumberAnswers} >
                 <Dropdown.Menu>
                   <Dropdown.Menu scrolling >
@@ -346,6 +355,7 @@ class HowDoI extends React.Component {
                 </Dropdown.Menu>
               </Dropdown>
               <Button onClick={this.clearQuestionResponseArray} negative>clear responses</Button> 
+              { bShowUndo && <Button onClick={this.restoreOldQuestionResponseArray} positive>Undo?</Button> }
               </div>
               <br/>
               <p className="text-center">Other options (click to toggle):</p>
